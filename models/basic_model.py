@@ -19,6 +19,5 @@ class BasicModel(torch.nn.Module):
         self.load_state_dict(torch.load(model_path))
 
     def set_requires_grad(self, requires_grad=False):
-        if self.model is not None:
-            for param in self.model.parameters():
-                param.requires_grad = requires_grad
+        for param in self.parameters():
+            param.requires_grad = requires_grad
