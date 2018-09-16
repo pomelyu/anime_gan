@@ -144,4 +144,4 @@ Temporary Items
 .apdisk
 
 ## =========== Customized =========== ##
-# .vscode
+.vscode/settings.json
