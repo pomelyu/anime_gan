@@ -88,8 +88,8 @@ def train(**kwargs):
         ))
 
         demoer.evaluate(net_G)
-        net_D.save("checkpoints")
-        net_G.save("checkpoints")
+        net_D.save(opt.save_model_path)
+        net_G.save(opt.save_model_path)
 
 if __name__ == "__main__":
     import fire

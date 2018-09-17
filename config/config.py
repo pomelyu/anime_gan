@@ -5,6 +5,7 @@ class DefaultConfig(object):
     noise_size = 100
 
     data_path = "data/faces"
+    save_model_path = "checkpoints"
     out_path = "out"
 
     max_epochs = 5
