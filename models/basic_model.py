@@ -8,11 +8,11 @@ class BasicModel(torch.nn.Module):
         self.model = torch.nn.Sequential()
 
     def save(self, checkpoint_dir):
-        if self.model_namename is None:
+        if self.model_name is not None:
             prefix = "{}/{}_".format(checkpoint_dir, self.model_name)
             name = time.strftime(prefix + "%m%d_%H_%M_%S.pth")
 
-        torch.save(self.state_dict(), name)
+            torch.save(self.state_dict(), name)
         return name
 
     def load(self, model_path):
