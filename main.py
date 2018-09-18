@@ -19,7 +19,7 @@ def train(**kwargs):
     anime_dataloader = DataLoader(anime_data, batch_size=opt.batch_size, shuffle=True)
 
     noise_data = NoiseData(opt.noise_size, len(anime_data))
-    noise_dataloader = DataLoader(noise_data, batch_size=opt.batch_size)
+    noise_dataloader = DataLoader(noise_data, batch_size=opt.batch_size, shuffle=True)
 
     net_G = NetG(opt)
     net_D = NetD(opt)
