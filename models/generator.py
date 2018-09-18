@@ -31,7 +31,7 @@ class NetG(BasicModel):
 
             # (ngf*1, 32, 32)
             nn.ConvTranspose2d(ngf*1, 3, kernel_size=5, stride=3, padding=1, bias=False),
-            nn.Sigmoid(),
+            nn.Tanh(),
 
             # (3, 96, 96)
         )

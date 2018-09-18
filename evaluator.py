@@ -1,5 +1,6 @@
 import time
 
+import torch
 from torch.utils.data import DataLoader
 from torchvision.utils import make_grid, save_image
 from dataset import NoiseData
@@ -20,6 +21,8 @@ class Evaluator():
 
     def evaluate(self, generator):
         res = generator(self.feature_maps)
+        res = res.cpu()
+        res = res * torch.FloatTensor([0.5, 0.5, 0.5]).view(3, 1, 1) + torch.FloatTensor([0.5, 0.5, 0.5]).view(3, 1, 1)
         image = make_grid(res, self.grid_size)
 
         prefix = "{}/result_".format(self.out_path)

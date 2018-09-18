@@ -9,7 +9,9 @@ class AnimeData(Dataset):
         self.images = [os.path.join(data_path, name) for name in os.listdir(data_path) if name.endswith(".jpg")]
         self.transforms = T.Compose([
             T.Resize(96),
+            T.CenterCrop(96),
             T.ToTensor(),
+            T.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         ])
 
     def __getitem__(self, index):
@@ -28,7 +30,7 @@ class NoiseData(Dataset):
         self.length = length
 
     def __getitem__(self, index):
-        return torch.rand(self.noise_size, 1, 1)
+        return torch.randn(self.noise_size, 1, 1)
 
     def __len__(self):
         return self.length
