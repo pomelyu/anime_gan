@@ -12,7 +12,7 @@ from config import opt
 def train(**kwargs):
     opt._parse(kwargs)
 
-    demoer = Evaluator(opt.out_path, opt.noise_size)
+    demoer = Evaluator(opt)
 
     anime_data = AnimeData(opt.data_path)
     anime_dataloader = DataLoader(anime_data, batch_size=opt.batch_size, shuffle=True)
@@ -22,6 +22,10 @@ def train(**kwargs):
 
     net_G = NetG(opt)
     net_D = NetD()
+
+    if opt.use_gpu:
+        net_G = net_G.cuda()
+        net_D = net_D.cuda()
 
     criterion = torch.nn.BCELoss()
     optimizer_G = torch.optim.Adam(net_G.parameters(), lr=opt.lr)
@@ -37,6 +41,14 @@ def train(**kwargs):
         num_batch = len(anime_dataloader)
         for true_image, feature_map in tqdm(zip(anime_dataloader, noise_dataloader), total=num_batch):
             num_data = true_image.shape[0]
+            true_targets = torch.ones(num_data)
+            fake_targets = torch.zeros(num_data)
+
+            if opt.use_gpu:
+                feature_map = feature_map.cuda()
+                true_image = true_image.cuda()
+                true_targets = true_targets.cuda()
+                fake_targets = fake_targets.cuda()
 
             fake_image = net_G(feature_map)
             fake_score = net_D(fake_image)
@@ -49,8 +61,8 @@ def train(**kwargs):
             net_D.train()
             net_D.set_requires_grad(True)
 
-            loss_D = criterion(fake_score, torch.zeros(num_data)) + \
-                criterion(true_score, torch.ones(num_data))
+            loss_D = criterion(fake_score, fake_targets) + \
+                criterion(true_score, true_targets)
             loss_D.backward(retain_graph=True)
             optimizer_D.step()
 
@@ -63,7 +75,7 @@ def train(**kwargs):
             net_D.eval()
             net_D.set_requires_grad(False)
 
-            loss_G = criterion(fake_score, torch.ones(num_data))
+            loss_G = criterion(fake_score, true_targets)
             loss_G.backward()
             optimizer_G.step()
 
