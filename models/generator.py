@@ -7,33 +7,34 @@ class NetG(BasicModel):
         self.model_name = "NetG"
 
         self.opt = opt
-        self.model = nn.Sequential(
+        ngf = opt.ngf
+        self.main = nn.Sequential(
             # (noise_size, 1, 1)
-            nn.ConvTranspose2d(opt.noise_size, 512, kernel_size=4, stride=1, padding=0, bias=False),
-            nn.BatchNorm2d(512),
+            nn.ConvTranspose2d(opt.noise_size, ngf*8, kernel_size=4, stride=1, padding=0, bias=False),
+            nn.BatchNorm2d(ngf*8),
             nn.ReLU(inplace=True),
 
-            # (512, 4, 4)
-            nn.ConvTranspose2d(512, 256, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(256),
+            # (ngf*8, 4, 4)
+            nn.ConvTranspose2d(ngf*8, ngf*4, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(ngf*4),
             nn.ReLU(inplace=True),
 
-            # (256, 8, 8)
-            nn.ConvTranspose2d(256, 128, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(128),
+            # (ngf*4, 8, 8)
+            nn.ConvTranspose2d(ngf*4, ngf*2, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(ngf*2),
             nn.ReLU(inplace=True),
 
-            # (128, 16, 16)
-            nn.ConvTranspose2d(128, 64, kernel_size=4, stride=2, padding=1, bias=False),
+            # (ngf*2, 16, 16)
+            nn.ConvTranspose2d(ngf*2, ngf*1, kernel_size=4, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
 
-            # (64, 32, 32)
-            nn.ConvTranspose2d(64, 3, kernel_size=4, stride=2, padding=1, bias=False),
+            # (ngf*1, 32, 32)
+            nn.ConvTranspose2d(ngf*1, 3, kernel_size=5, stride=3, padding=1, bias=False),
             nn.Sigmoid(),
 
-            # (3, 64, 64)
+            # (3, 96, 96)
         )
 
-    def forward(self, input):
-        return self.model(input)
+    def forward(self, x):
+        return self.main(x)

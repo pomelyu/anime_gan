@@ -23,7 +23,7 @@ def test_anime_data():
     anime_iter = iter(anime_dataloader)
     images = next(anime_iter)
 
-    assert images.shape == torch.Tensor(BATCH_SIZE, 3, 64, 64).shape
+    assert images.shape == torch.Tensor(BATCH_SIZE, 3, 96, 96).shape
     assert torch.max(images) <= 1 and torch.min(images) >= 0
 
 

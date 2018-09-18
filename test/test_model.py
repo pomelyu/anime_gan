@@ -19,6 +19,8 @@ NOISE_SIZE = 100
 # ============================= #
 class Opt():
     noise_size = NOISE_SIZE
+    ndf = 64
+    ngf = 64
 opt = Opt()
 
 noise_data = NoiseData(NOISE_SIZE, BATCH_SIZE)
@@ -28,7 +30,7 @@ noise_iter = iter(noise_dataloader)
 feature_map = next(noise_iter)
 
 net_G = NetG(opt)
-net_D = NetD()
+net_D = NetD(opt)
 
 criterion = torch.nn.MSELoss()
 optimzer = torch.optim.SGD(net_D.parameters(), lr=0.1)
@@ -39,7 +41,7 @@ optimzer = torch.optim.SGD(net_D.parameters(), lr=0.1)
 # ============================= #
 def test_networks():
     generated = net_G(feature_map)
-    assert generated.shape == torch.Tensor(BATCH_SIZE, 3, 64, 64).shape
+    assert generated.shape == torch.Tensor(BATCH_SIZE, 3, 96, 96).shape
     assert torch.max(generated) <= 1
     assert torch.min(generated) >= 0
 

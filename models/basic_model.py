@@ -5,7 +5,7 @@ class BasicModel(torch.nn.Module):
     def __init__(self):
         super(BasicModel, self).__init__()
         self.model_name = str(type(self))
-        self.model = torch.nn.Sequential()
+        self.main = torch.nn.Sequential()
 
     def save(self, checkpoint_dir):
         if self.model_name is not None:

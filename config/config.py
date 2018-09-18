@@ -3,6 +3,8 @@ import warnings
 class DefaultConfig(object):
     use_gpu = False
     noise_size = 100
+    ngf = 64
+    ndf = 64
 
     data_path = "data/faces"
     save_model_path = "checkpoints"

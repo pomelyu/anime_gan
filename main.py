@@ -22,7 +22,7 @@ def train(**kwargs):
     noise_dataloader = DataLoader(noise_data, batch_size=opt.batch_size)
 
     net_G = NetG(opt)
-    net_D = NetD()
+    net_D = NetD(opt)
 
     if opt.use_gpu:
         net_G = net_G.cuda()

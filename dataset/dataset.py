@@ -8,7 +8,7 @@ class AnimeData(Dataset):
     def __init__(self, data_path):
         self.images = [os.path.join(data_path, name) for name in os.listdir(data_path) if name.endswith(".jpg")]
         self.transforms = T.Compose([
-            T.Resize(64),
+            T.Resize(96),
             T.ToTensor(),
         ])
 
