@@ -10,9 +10,18 @@ class DefaultConfig(object):
     save_model_path = "checkpoints"
     out_path = "out"
 
-    max_epochs = 5
-    batch_size = 16
-    lr = 0.001
+    netd_path = None
+    netg_path = None
+
+    max_epochs = 200
+    batch_size = 256
+    lr_d = 2e-4
+    lr_g = 2e-4
+    beta1 = 0.5
+    beta2 = 0.999
+
+    every_d = 1
+    every_g = 5
 
     def _parse(self, kwargs):
         for k, v in kwargs.items():

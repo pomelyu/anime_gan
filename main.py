@@ -29,18 +29,24 @@ def train(**kwargs):
         net_D = net_D.cuda()
 
     criterion = torch.nn.BCELoss()
-    optimizer_G = torch.optim.Adam(net_G.parameters(), lr=opt.lr)
-    optimizer_D = torch.optim.Adam(net_D.parameters(), lr=opt.lr)
+    optimizer_G = torch.optim.Adam(net_G.parameters(), lr=opt.lr_g, betas=(opt.beta1, opt.beta2))
+    optimizer_D = torch.optim.Adam(net_D.parameters(), lr=opt.lr_d, betas=(opt.beta1, opt.beta2))
 
     loss_D_meteor = meter.AverageValueMeter()
     loss_G_meteor = meter.AverageValueMeter()
+
+    if opt.netd_path is not None:
+        net_D.load(opt.netd_path)
+    if opt.netg_path is not None:
+        net_G.load(opt.netg_path)
 
     for epoch in range(opt.max_epochs):
         loss_D_meteor.reset()
         loss_G_meteor.reset()
 
         num_batch = len(anime_dataloader)
-        for true_image, feature_map in tqdm(zip(anime_dataloader, noise_dataloader), total=num_batch):
+        generator = enumerate(zip(anime_dataloader, noise_dataloader))
+        for ii, (true_image, feature_map) in tqdm(generator, total=num_batch):
             num_data = true_image.shape[0]
             true_targets = torch.ones(num_data)
             fake_targets = torch.zeros(num_data)
@@ -56,31 +62,33 @@ def train(**kwargs):
             true_score = net_D(true_image)
 
             # Train discriminator
-            optimizer_D.zero_grad()
-            net_G.eval()
-            net_G.set_requires_grad(False)
-            net_D.train()
-            net_D.set_requires_grad(True)
+            if ii % opt.every_d == 0:
+                optimizer_D.zero_grad()
+                net_G.eval()
+                net_G.set_requires_grad(False)
+                net_D.train()
+                net_D.set_requires_grad(True)
 
-            loss_D = criterion(fake_score, fake_targets) + \
-                criterion(true_score, true_targets)
-            loss_D.backward(retain_graph=True)
-            optimizer_D.step()
+                loss_D = criterion(fake_score, fake_targets) + \
+                    criterion(true_score, true_targets)
+                loss_D.backward(retain_graph=True)
+                optimizer_D.step()
 
-            loss_D_meteor.add(loss_D.detach().item())
+                loss_D_meteor.add(loss_D.detach().item())
 
             # Train generator
-            optimizer_G.zero_grad()
-            net_G.train()
-            net_G.set_requires_grad(True)
-            net_D.eval()
-            net_D.set_requires_grad(False)
+            if ii % opt.every_g == 0:
+                optimizer_G.zero_grad()
+                net_G.train()
+                net_G.set_requires_grad(True)
+                net_D.eval()
+                net_D.set_requires_grad(False)
 
-            loss_G = criterion(fake_score, true_targets)
-            loss_G.backward()
-            optimizer_G.step()
+                loss_G = criterion(fake_score, true_targets)
+                loss_G.backward()
+                optimizer_G.step()
 
-            loss_G_meteor.add(loss_G.detach().item())
+                loss_G_meteor.add(loss_G.detach().item())
 
         print("Epoch {epoch:0>2d}: loss_D - {loss_D:.3f}, loss_G - {loss_G:.3f}".format(
             epoch=epoch+1,
