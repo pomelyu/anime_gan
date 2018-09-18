@@ -1,4 +1,5 @@
 # pylint: disable=invalid-name
+import time
 import torch
 from torch.utils.data import DataLoader
 from torchnet import meter
@@ -90,6 +91,7 @@ def train(**kwargs):
         demoer.evaluate(net_G)
         net_D.save(opt.save_model_path)
         net_G.save(opt.save_model_path)
+        time.sleep(0.5)
 
 if __name__ == "__main__":
     import fire
