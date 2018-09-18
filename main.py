@@ -57,21 +57,18 @@ def train(**kwargs):
                 true_targets = true_targets.cuda()
                 fake_targets = fake_targets.cuda()
 
-            fake_image = net_G(feature_map)
-            fake_score = net_D(fake_image)
-            true_score = net_D(true_image)
-
             # Train discriminator
             if ii % opt.every_d == 0:
                 optimizer_D.zero_grad()
-                net_G.eval()
                 net_G.set_requires_grad(False)
-                net_D.train()
                 net_D.set_requires_grad(True)
 
+                fake_image = net_G(feature_map)
+                fake_score = net_D(fake_image)
+                true_score = net_D(true_image)
                 loss_D = criterion(fake_score, fake_targets) + \
                     criterion(true_score, true_targets)
-                loss_D.backward(retain_graph=True)
+                loss_D.backward()
                 optimizer_D.step()
 
                 loss_D_meteor.add(loss_D.detach().item())
@@ -79,11 +76,11 @@ def train(**kwargs):
             # Train generator
             if ii % opt.every_g == 0:
                 optimizer_G.zero_grad()
-                net_G.train()
                 net_G.set_requires_grad(True)
-                net_D.eval()
                 net_D.set_requires_grad(False)
 
+                fake_image = net_G(feature_map)
+                fake_score = net_D(fake_image)
                 loss_G = criterion(fake_score, true_targets)
                 loss_G.backward()
                 optimizer_G.step()
