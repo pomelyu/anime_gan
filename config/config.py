@@ -23,6 +23,8 @@ class DefaultConfig(object):
     every_d = 1
     every_g = 5
 
+    save_freq = 10
+
     def _parse(self, kwargs):
         for k, v in kwargs.items():
             if not hasattr(self, k):

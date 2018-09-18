@@ -93,9 +93,10 @@ def train(**kwargs):
             loss_G=loss_G_meteor.value()[0],
         ))
 
-        demoer.evaluate(net_G)
-        net_D.save(opt.save_model_path)
-        net_G.save(opt.save_model_path)
+        if epoch % opt.save_freq == opt.save_freq - 1:
+            demoer.evaluate(net_G)
+            net_D.save(opt.save_model_path)
+            net_G.save(opt.save_model_path)
         time.sleep(0.5)
 
 if __name__ == "__main__":
