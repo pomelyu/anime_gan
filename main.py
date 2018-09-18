@@ -87,7 +87,7 @@ def train(**kwargs):
 
                 loss_G_meteor.add(loss_G.detach().item())
 
-        print("Epoch {epoch:0>2d}: loss_D - {loss_D:.3f}, loss_G - {loss_G:.3f}".format(
+        print("Epoch {epoch:0>2d}: loss_D - {loss_D}, loss_G - {loss_G}".format(
             epoch=epoch+1,
             loss_D=loss_D_meteor.value()[0],
             loss_G=loss_G_meteor.value()[0],
