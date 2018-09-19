@@ -1,5 +1,6 @@
 # pylint: disable=invalid-name
 import time
+import os
 import torch
 from torch.utils.data import DataLoader
 from torchnet import meter
@@ -46,7 +47,7 @@ def train(**kwargs):
 
         num_batch = len(anime_dataloader)
         generator = enumerate(zip(anime_dataloader, noise_dataloader))
-        for ii, (true_image, feature_map) in tqdm(generator, total=num_batch):
+        for ii, (true_image, feature_map) in tqdm(generator, total=num_batch, ascii=True):
             num_data = true_image.shape[0]
             true_targets = torch.ones(num_data)
             fake_targets = torch.zeros(num_data)
@@ -73,6 +74,10 @@ def train(**kwargs):
 
                 loss_D_meteor.add(loss_D.detach().item())
 
+                if os.path.exists(opt.debug_file):
+                    import ipdb
+                    ipdb.set_trace()
+
             # Train generator
             if ii % opt.every_g == 0:
                 optimizer_G.zero_grad()
@@ -87,11 +92,16 @@ def train(**kwargs):
 
                 loss_G_meteor.add(loss_G.detach().item())
 
-        print("Epoch {epoch:0>2d}: loss_D - {loss_D}, loss_G - {loss_G}".format(
+                if os.path.exists(opt.debug_file):
+                    import ipdb
+                    ipdb.set_trace()
+
+        gan_log = "Epoch {epoch:0>2d}: loss_D - {loss_D}, loss_G - {loss_G}".format(
             epoch=epoch+1,
             loss_D=loss_D_meteor.value()[0],
             loss_G=loss_G_meteor.value()[0],
-        ))
+        )
+        print(gan_log)
 
         if epoch % opt.save_freq == opt.save_freq - 1:
             demoer.evaluate(net_G)

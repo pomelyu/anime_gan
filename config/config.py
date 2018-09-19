@@ -9,6 +9,7 @@ class DefaultConfig(object):
     data_path = "data/faces"
     save_model_path = "checkpoints"
     out_path = "out"
+    debug_file = "debug/debug"
 
     netd_path = None
     netg_path = None
