@@ -14,22 +14,18 @@ class NetD(BasicModel):
 
             # (ndf*1, 32, 32)
             nn.Conv2d(ndf*1, ndf*2, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(ndf*2),
             nn.LeakyReLU(inplace=True),
 
             # (ndf*2, 16, 16)
             nn.Conv2d(ndf*2, ndf*4, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(ndf*4),
             nn.LeakyReLU(inplace=True),
 
             # (ndf*4, 8, 8)
             nn.Conv2d(ndf*4, ndf*8, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(ndf*8),
             nn.LeakyReLU(inplace=True),
 
             # (ndf*8, 4, 4)
             nn.Conv2d(ndf*8, 1, kernel_size=4, stride=1, padding=0, bias=False),
-            nn.Sigmoid(),
 
             # (1, 1, 1)
         )

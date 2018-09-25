@@ -8,6 +8,7 @@ from tqdm import tqdm
 
 from dataset import AnimeData, NoiseData
 from models import NetG, NetD
+from models.loss import WGANLoss
 from evaluator import Evaluator
 from config import opt
 
@@ -25,13 +26,15 @@ def train(**kwargs):
     net_G = NetG(opt)
     net_D = NetD(opt)
 
+    criterion = WGANLoss(opt.wgan_lambda, opt.use_gpu)
+
     if opt.use_gpu:
         net_G = net_G.cuda()
         net_D = net_D.cuda()
+        criterion = criterion.cuda()
 
-    criterion = torch.nn.BCELoss()
-    optimizer_G = torch.optim.Adam(net_G.parameters(), lr=opt.lr_g, betas=(opt.beta1, opt.beta2))
-    optimizer_D = torch.optim.Adam(net_D.parameters(), lr=opt.lr_d, betas=(opt.beta1, opt.beta2))
+    optimizer_G = torch.optim.RMSprop(net_G.parameters(), lr=opt.lr_g, momentum=opt.beta1, alpha=opt.beta2)
+    optimizer_D = torch.optim.RMSprop(net_D.parameters(), lr=opt.lr_d, momentum=opt.beta1, alpha=opt.beta2)
 
     loss_D_meteor = meter.AverageValueMeter()
     loss_G_meteor = meter.AverageValueMeter()
@@ -48,45 +51,42 @@ def train(**kwargs):
         num_batch = len(anime_dataloader)
         generator = enumerate(zip(anime_dataloader, noise_dataloader))
         for ii, (true_image, feature_map) in tqdm(generator, total=num_batch, ascii=True):
-            num_data = true_image.shape[0]
-            true_targets = torch.ones(num_data)
-            fake_targets = torch.zeros(num_data)
 
             if opt.use_gpu:
                 feature_map = feature_map.cuda()
                 true_image = true_image.cuda()
-                true_targets = true_targets.cuda()
-                fake_targets = fake_targets.cuda()
+
+            net_G.set_requires_grad(False)
+            net_D.set_requires_grad(True)
 
             # Train discriminator
             if ii % opt.every_d == 0:
                 optimizer_D.zero_grad()
-                net_G.set_requires_grad(False)
-                net_D.set_requires_grad(True)
 
                 fake_image = net_G(feature_map)
                 fake_score = net_D(fake_image)
                 true_score = net_D(true_image)
-                loss_D = criterion(fake_score, fake_targets) + \
-                    criterion(true_score, true_targets)
+                loss_D = criterion.discriminator_loss(net_D, true_score, fake_score, true_image, fake_image)
                 loss_D.backward()
                 optimizer_D.step()
-
-                loss_D_meteor.add(loss_D.detach().item())
 
                 if os.path.exists(opt.debug_file):
                     import ipdb
                     ipdb.set_trace()
 
+
+            net_G.set_requires_grad(True)
+            net_D.set_requires_grad(False)
+
+            loss_D_meteor.add(loss_D.detach().item())
+
             # Train generator
             if ii % opt.every_g == 0:
                 optimizer_G.zero_grad()
-                net_G.set_requires_grad(True)
-                net_D.set_requires_grad(False)
 
                 fake_image = net_G(feature_map)
                 fake_score = net_D(fake_image)
-                loss_G = criterion(fake_score, true_targets)
+                loss_G = criterion.generator_loss(fake_score)
                 loss_G.backward()
                 optimizer_G.step()
 

@@ -20,6 +20,7 @@ class DefaultConfig(object):
     lr_g = 2e-4
     beta1 = 0.5
     beta2 = 0.999
+    wgan_lambda = 10
 
     every_d = 1
     every_g = 5
