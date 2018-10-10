@@ -50,7 +50,9 @@ def train(**kwargs):
 
         num_batch = len(anime_dataloader)
         generator = enumerate(zip(anime_dataloader, noise_dataloader))
-        for ii, (true_image, feature_map) in tqdm(generator, total=num_batch, ascii=True):
+        if opt.progress:
+            generator = tqdm(generator, total=num_batch, ascii=True)
+        for ii, (true_image, feature_map) in generator:
 
             if opt.use_gpu:
                 feature_map = feature_map.cuda()

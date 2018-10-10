@@ -26,6 +26,7 @@ class DefaultConfig(object):
     every_g = 5
 
     save_freq = 10
+    progress = True
 
     def _parse(self, kwargs):
         for k, v in kwargs.items():
